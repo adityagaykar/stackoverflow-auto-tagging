@@ -59,7 +59,7 @@ public class XMLParser {
 						if(postTypeId.equals("1")){
 							Set<String> bodyTokens = new HashSet<String>();
 							Set<String> tagTokens = new HashSet<String>();
-							String body = attributes.getValue("Body");
+							String body = attributes.getValue("Title"); // changing to titles
 							String tags = attributes.getValue("Tags");
 							body = body.toLowerCase();
 							tags = tags.toLowerCase();
