@@ -3,6 +3,7 @@ package sem2.smai.project.src;
 
 
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,9 +29,10 @@ public class TitleTagExtractor {
 	private static final Pattern p = Pattern.compile("\\<.*?\\>",Pattern.MULTILINE);
 	private static final Pattern p1 = Pattern.compile("\\<(.*?)\\>",Pattern.MULTILINE);
 	private int c;
-	
+	private Set<String> tags;
 	public TitleTagExtractor(){
 		//postIndexer = new PostIndexer();
+		tags = new HashSet<String>();
 	}
 	public void init_parser(String filepath, String ouputFilePath, String startStr, String limitStr){
 		try{
@@ -80,23 +82,30 @@ public class TitleTagExtractor {
 							Matcher m = p1.matcher(tags);							
 							String tmp = null;
 							String tagStr = "";
+							boolean hasTag = false;
 							while(m.find()){
 								tmp = m.group(1);
 								if( tmp.length() > 0){
-									tagTokens.add(tmp);									
+									tagTokens.add(tmp);
+									if(tags.contains(tmp))
+										hasTag = true;
 								}
 							}		
 							tagStr = String.join("|", tagTokens);
 							post.setBodyTokens(bodyTokens);
 							post.setTags(tagTokens);
-							if ( c > start)
-								prx.println(body+"#@#"+tagStr);
-							
+							if(hasTag){
+								if ( c > start)
+									prx.println(body+"#@#"+tagStr);
 								c++;
-							if(c > (start+limit)){
-								prx.close();
-								System.exit(0);
+								if(c > (start+limit)){
+									prx.close();
+									System.exit(0);
+								}
 							}
+							
+								
+							
 							//postIndexer.indexPosts(post);
 //								RegexTest rt = new RegexTest();
 //								rt.test(post);
@@ -137,12 +146,25 @@ public class TitleTagExtractor {
 		
 
 	}
+	public void readTags(String filepath){
+		try{
+			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filepath)));
+			String tmp;
+			while((tmp = br.readLine()) != null)
+				tags.add(tmp.split("\\|")[0].trim());
+			br.close();
+		}catch(Exception e){			
+			e.printStackTrace();
+		}
+		
+	}
 	public static void main(String[] args) {
 		if(args.length < 1 ){
 			System.out.println("Invalid args: pass xml file path as argument");
 			System.exit(0);
 		}
 		TitleTagExtractor p = new TitleTagExtractor();
+		p.readTags(args[4]);
 		System.out.println("Started : "+new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date()));
 		p.init_parser(args[0], args[1], args[2], args[3]);
 		System.out.println("Ended : "+new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date()));
