@@ -66,7 +66,8 @@ public class TitleTagExtractor {
 						if(postTypeId.equals("1")){
 							Set<String> bodyTokens = new HashSet<String>();
 							Set<String> tagTokens = new HashSet<String>();
-							String body = attributes.getValue("Title"); // changing to titles
+							String body = attributes.getValue("Body"); // changing to titles
+							String title = attributes.getValue("Title"); // changing to titles
 							String tags = attributes.getValue("Tags");
 							body = body.toLowerCase();
 							tags = tags.toLowerCase();
@@ -96,9 +97,9 @@ public class TitleTagExtractor {
 							post.setTags(tagTokens);
 							if(hasTag){
 								if ( c > start)
-									prx.println(body+"#@#"+tagStr);
+									prx.println(title+"#@#"+String.join(" ",bodyTokens)+"#@#"+tagStr);
 								c++;
-								if(c > (start+limit)){
+								if(limit != -1 && c > (start+limit)){
 									prx.close();
 									System.exit(0);
 								}
@@ -150,8 +151,12 @@ public class TitleTagExtractor {
 		try{
 			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filepath)));
 			String tmp;
-			while((tmp = br.readLine()) != null)
+			int top = 0;
+			while((tmp = br.readLine()) != null && top < 100){
 				tags.add(tmp.split("\\|")[0].trim());
+				top++;
+			}
+				
 			br.close();
 		}catch(Exception e){			
 			e.printStackTrace();

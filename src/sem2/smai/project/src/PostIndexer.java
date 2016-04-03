@@ -1,12 +1,14 @@
 package sem2.smai.project.src;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -14,6 +16,7 @@ import java.util.TreeSet;
 public class PostIndexer {
 
 	private Map<String, Map<TagHelper,TagHelper>> mapper;
+	private Set<String> stopwords;
 	private int fileCount;
 	private int postCount;
 	private static final int POST_LIMIT =1000000;
@@ -21,6 +24,20 @@ public class PostIndexer {
 		fileCount = 1;
 		postCount = 0;
 		mapper = new HashMap<String, Map<TagHelper,TagHelper>>();
+		stopwords = new HashSet<String>();
+	}
+	
+	public void loadStopwords(){
+		try{
+			FileInputStream fis = new FileInputStream("rsc/stopwords2");
+			BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+			String tmp = null;
+			while((tmp = br.readLine()) != null){
+				stopwords.add(tmp);
+			}
+		} catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 	public void indexPosts(PostPOJO post){
 		//System.out.println(postCount);
@@ -28,6 +45,8 @@ public class PostIndexer {
 		Set<String> tagTokens = post.getTags();
 		Map<TagHelper,TagHelper> tmp = null;
 		for(String token : bodyTokens){
+			if(stopwords.contains(token))
+				continue;
 			if(mapper.containsKey(token)){
 				tmp = mapper.get(token);				
 			} else {
