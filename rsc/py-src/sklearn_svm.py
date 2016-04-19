@@ -6,8 +6,12 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn import preprocessing
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import recall_score, precision_score,accuracy_score, f1_score,confusion_matrix
+import warnings
+warnings.filterwarnings("ignore")
 import random
 import sys
+
 
 X_train = []
 Y_train = []
@@ -21,6 +25,7 @@ with open("/Users/adityagaykar/Dropbox/Development/MtechCSE/Sem2/SMAI/Stackoverf
 		test_labels.append([i.strip() for i in line.split("#@#")[1].split("|")])
 
 with open(sys.argv[1]) as f:
+#with open("title-index/title-tag-5k.out") as f:
 	c = 1
 	for line in f.readlines()[:-1]:
 		parts  = line.split("#@#")
@@ -36,9 +41,9 @@ lb = preprocessing.MultiLabelBinarizer() #preprocessing.LabelBinarizer()
 Y = lb.fit_transform(Y_train)
 
 classifier = Pipeline([
-    ('vectorizer', CountVectorizer()),
+    ('vectorizer', CountVectorizer(stop_words='english')),
     ('tfidf', TfidfTransformer()),
-    ('clf', OneVsRestClassifier(MultinomialNB()))])
+    ('clf', OneVsRestClassifier(LinearSVC()))])
 
 
 #random.shuffle(X_test)
@@ -48,15 +53,38 @@ all_labels = lb.inverse_transform(predicted)
 
 i = 0
 c = 0
+true_val = []
+predicted = []
+flag,flag2 = 0,0
 for item, labels in zip(X_test, all_labels):
+	#print labels,"\t ==> \t",test_labels[i]
 	labels = set(labels)
 	x_text = set(test_labels[i])
+	#print labels,test_labels[i]
 	if len(list(x_text.intersection(labels))) > 0:
+		if flag == 0:
+			true_val.append("1")
+			predicted.append("1")
+			flag = 1
+		else:
+			true_val.append("0")
+			predicted.append("0")
+			flag = 0
 		c+=1
+	else:
+		if flag2 == 0:
+			true_val.append("1")
+			predicted.append("0")
+			flag2 = 1
+		else:
+			true_val.append("0")
+			predicted.append("1")
+			flag2 = 0
 	i+=1
-    #print '%s => %s' % (item, ', '.join(labels))
-#print "True classified : ",c
-#print "Total : ",i
-#print "Accuracy : ", float(c)/float(i)
-#print "================================="
-print total_train_data,",",c,",",i,",",(float(c)/float(i))*100
+
+actual_acc = accuracy_score(test_labels, all_labels) * 100
+prici = precision_score(test_labels, all_labels, average="samples")
+recall =  recall_score(test_labels, all_labels, average="samples")
+f1_score = f1_score(test_labels, all_labels, average="samples")
+
+print total_train_data,"\t",(float(c)/float(i))*100,"\t",actual_acc,"\t",prici,"\t",recall,"\t",f1_score

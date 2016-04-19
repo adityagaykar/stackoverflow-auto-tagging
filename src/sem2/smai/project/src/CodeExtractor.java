@@ -10,8 +10,10 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,16 +27,16 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 
-public class TitleTagExtractor {
-	private static final Pattern p = Pattern.compile("\\<.*?\\>",Pattern.MULTILINE);
+public class CodeExtractor {
+	private static final Pattern p = Pattern.compile("\\<code\\>(.*?)\\</code\\>",Pattern.MULTILINE);
 	private static final Pattern p1 = Pattern.compile("\\<(.*?)\\>",Pattern.MULTILINE);
 	private int c;
 	private Set<String> tags;
-	public TitleTagExtractor(){
+	public CodeExtractor(){
 		//postIndexer = new PostIndexer();
 		tags = new HashSet<String>();
 	}
-	public void init_parser(String filepath, String ouputFilePath, String startStr, String limitStr, boolean bodyFlag){
+	public void init_parser(String filepath, String ouputFilePath, String startStr, String limitStr){
 		try{
 			c = 0;
 			int start = Integer.parseInt(startStr);
@@ -72,16 +74,31 @@ public class TitleTagExtractor {
 							body = body.toLowerCase();
 							tags = tags.toLowerCase();
 							PostPOJO post = new PostPOJO();
-							body = p.matcher(body).replaceAll("");
-							body = body.replaceAll("[^a-zA-Z0-9#+@ ]", " ");
-							String body_arr[] = body.split(" ");
-							for(String s : body_arr){
-								if(s.length() > 0){
-									bodyTokens.add(s);
-								}
-							}							
-							Matcher m = p1.matcher(tags);							
+							//body = p.matcher(body).replaceAll("");
+							//body = body.replaceAll("[^a-zA-Z0-9#+@ ]", " ");
+							String code = "";
+							List<String> codeList = new ArrayList<String>();
+							Matcher m1 = p.matcher(body);
 							String tmp = null;
+							while(m1.find()){
+								tmp = m1.group(1);
+								tmp =tmp.replaceAll("[^a-zA-Z0-9#+@ ]", " ");
+								tmp = tmp.trim();
+								if( tmp.length() > 0){
+									codeList.add(tmp);									
+								}
+							}
+							code = String.join(" ", codeList);
+							code = code.trim();
+							//code = code.replaceAll("[^a-zA-Z0-9#+@ ]", " ");
+//							String body_arr[] = body.split(" ");
+//							for(String s : body_arr){
+//								if(s.length() > 0){
+//									bodyTokens.add(s);
+//								}
+//							}							
+							Matcher m = p1.matcher(tags);							
+							//String tmp = null;
 							String tagStr = "";
 							boolean hasTag = false;
 							while(m.find()){
@@ -95,12 +112,9 @@ public class TitleTagExtractor {
 							tagStr = String.join("|", tagTokens);
 							post.setBodyTokens(bodyTokens);
 							post.setTags(tagTokens);
-							if(hasTag){
+							if(hasTag && code.length() > 0){
 								if ( c > start)
-									if(bodyFlag)
-										prx.println(title+"#@#"+String.join(" ",bodyTokens)+"#@#"+tagStr);
-									else
-										prx.println(title+"#@#"+tagStr);
+										prx.println(code+"#@#"+tagStr);
 								c++;
 								if(limit != -1 && c > (start+limit)){
 									prx.close();
@@ -172,10 +186,10 @@ public class TitleTagExtractor {
 			System.out.println("Invalid args: pass xml file path as argument");
 			System.exit(0);
 		}
-		TitleTagExtractor p = new TitleTagExtractor();
+		CodeExtractor p = new CodeExtractor();
 		p.readTags(args[4]);
 		System.out.println("Started : "+new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date()));
-		p.init_parser(args[0], args[1], args[2], args[3], args[4].equals("yes"));
+		p.init_parser(args[0], args[1], args[2], args[3]);
 		System.out.println("Ended : "+new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date()));
 	}
 }
