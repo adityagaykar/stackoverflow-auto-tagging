@@ -1,0 +1,12 @@
+# Project : Stackoverflow auto tagging
+
+# Dataset used : Stackoverflow dump from https://archive.org/details/stackexchange
+
+# XML Parsing :
+	1. Java based XML parser coupled with indexer
+
+# Algorithms tried and test :
+
+	1. SVM on post titles
+	2. SVM, Bayes on code snippets
+	3. Feature vector based approach
