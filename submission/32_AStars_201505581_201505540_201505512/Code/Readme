@@ -1,4 +1,4 @@
 # Steps to execute svm code
 
-scripts/run_svm.py <test-title-tag-out-file-path> <train-title-tag-out-file-path>
+scripts/run_svm.sh <test-title-tag-out-file-path> <train-title-tag-out-file-path>
 
