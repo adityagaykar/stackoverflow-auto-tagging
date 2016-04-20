@@ -17,14 +17,14 @@ import warnings
 import re
 warnings.filterwarnings("ignore")
 
-if len(sys.argv)!=2 :
+if len(sys.argv)!=3 :
     print "Provide the traing file"
     sys.exit(0)
 
 with open(sys.argv[1],'rb') as f:   
         reader=csv.reader(f)
         l=list(reader)
-with open('code_tags.in','rb') as f:
+with open(sys.argv[2],'rb') as f:
     reader=csv.reader(f,delimiter='|')
     l1=list(reader)
 tagsdict={}
