@@ -58,7 +58,6 @@ while True:
 	for line in iter(raw_input,''):
 		body += line+" "
 	code = ""
-	print "Code : "
 	for line in iter(raw_input,''):
 		code += line+" "
 	tags = raw_input("Tags : ")
